@@ -83,8 +83,20 @@ function playerMove(dir){   //->tetrimino movement has been consolidated into a 
     
 }
 
-function playerRotate(dir) {
-    rotate(player.matrix, dir);
+function playerRotate(dir) {    //>> function has been modified for edge detection so that upon rotation if the tetrimino collides with a side it will correct itself
+    const pos = player.pos.x;
+    let offset = 1;
+    rotate(player.matrix, dir);     //->here we are simply calling for rotation
+    while(collide(arena, player)){
+        player.pos.x += offset;     //##here upon detecting collision the abcissa of the tetrimino will be moved by the offset
+        offset = -(offset + (offset>0 ? 1 : -1));   //## how much is the tetrimino supposed to move to correct itself is calculated here
+        //>>it basically just keeps checking both sides until it detects a collision and saves the distance into offset
+        if(offset > player.matrix[0].length) {      //!! this line checks if the offset is large enough to move the whole matrix
+            rotate(player.matrix, -dir);        //!! here the tetrimino is rotated in the opposite direction
+            player.pos.x = pos;     //!!after rotation the tetrimino is set back to its initial position
+            return;     //-> basically the code keeps looking for an offset until it is big enough and on the correct side to navigate the while tetrimino matrix accross the obstacle
+        }
+    }
 }
 
 function rotate(matrix, dir) {  //!! to rotate a tetrimino we transpose its matrix and then reverse its columns

@@ -75,6 +75,14 @@ function playerDrop() {
     dropCounter = 0;    //>> here the drop counter is reset after every drop inorder to keep the drops uniform
 }
 
+function playerMove(dir){
+    player.pos.x += dir;
+    if(collide(arena, player)){
+        player.pos.x -= dir;
+    }
+    
+}
+
 let dropCounter = 0;    //->we set a drop counter to count how much time later the next drop in ordinate should occur
 let dropInterval = 1000;    //->this is the interval with which we compare to drop the tetrimino
 
@@ -103,10 +111,10 @@ const player = {
 document.addEventListener('keydown', event=>{
     // console.log(event);
     if(event.keyCode === 37){
-        player.pos.x--;
+        playerMove(-1);
     }
     else if(event.keyCode === 39){
-        player.pos.x++;
+        playerMove(1);
     }
     else if(event.keyCode === 40){
         playerDrop();

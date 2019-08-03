@@ -55,4 +55,16 @@ const player = {
     matrix: matrix
 }
 
+document.addEventListener('keydown', event=>{
+    // console.log(event);
+    if(event.keyCode === 37){
+        player.pos.x--;
+    }
+    else if(event.keyCode === 39){
+        player.pos.x++;
+    }
+    
+    
+})
+
 update(); //>> game is initialized here

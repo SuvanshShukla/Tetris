@@ -3,13 +3,15 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
+function arenaSweep() {
+    for(let y = arena.length-1; y<0; --y){
+        for (let x=0; x<arena[y].length; ++x){
+            
+        }
+    }
+}
 
 
-const matrix = [    //->this is the data structure for holding the tetriminos, also we have three rows for taking into account the rotation of the pieces
-    [0, 0, 0],
-    [1, 1, 1],
-    [0, 1, 0]
-];
 
 function collide(arena, player) {   //>>for collision detection
     const [m, o] = [player.matrix, player.pos];
@@ -33,6 +35,58 @@ function createMatrix(w, h) {   //## this function is made to draw all tetrimino
     return matrix;
 }
 
+function createPiece(type) {
+    if(type === 'T'){
+        return [    //->this is the data structure for holding the tetriminos, also we have three rows for taking into account the rotation of the pieces
+            [0, 0, 0],
+            [1, 1, 1],
+            [0, 1, 0]
+        ];
+    }
+    else if(type === 'O'){
+        return [    
+            [2, 2],
+            [2, 2]
+        ];
+    }
+    else if(type === 'L'){
+        return [
+            [0, 3, 0],
+            [0, 3, 0],
+            [0, 3, 3]
+        ]
+    }
+    else if(type === 'J'){
+        return [
+            [0, 4, 0],
+            [0, 4, 0],
+            [4, 4, 0]
+        ]
+    }
+    else if(type === 'I'){
+        return [
+            [0, 5, 0, 0],
+            [0, 5, 0, 0],
+            [0, 5, 0, 0],
+            [0, 5, 0, 0]
+        ]
+    }
+    else if(type === 'S'){
+        return [
+            [0, 6, 6],
+            [6, 6, 0],
+            [0, 0, 0]
+        ]
+    }
+    else if(type === 'Z'){
+        return [
+            [7, 7, 0],
+            [0, 7, 7],
+            [0, 0, 0]
+        ]
+    }
+}
+
 function draw() {   //OKK made a separate function to draw tetriminos
     context.fillStyle = '#000'; //-> this and the line below it are written to refresh the canvas 
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -45,7 +99,7 @@ function drawMatrix(matrix, offset) {
     matrix.forEach((row, y) => {     //>>this is for drawing/filling in each space for the piece
         row.forEach((value, x) => {
             if (value !== 0) {     //>>only if the space is not zero
-                context.fillStyle = 'red';       //## fills the block with color red
+                context.fillStyle = colors[value];       //## fills the block with color red
                 context.fillRect(x + offset.x,
                     y + offset.y,
                     1, 1);   //## fills with one unit at the corresponding abcissa and ordinate
@@ -70,7 +124,7 @@ function playerDrop() {
     if(collide(arena, player)){
         player.pos.y--;
         merge(arena, player);
-        player.pos.y = 0;
+        playerReset();
     }
     dropCounter = 0;    //>> here the drop counter is reset after every drop inorder to keep the drops uniform
 }
@@ -81,6 +135,17 @@ function playerMove(dir){   //->tetrimino movement has been consolidated into a 
         player.pos.x -= dir;    //-> this is to allow the move back of the tetrimino
     }
     
+}
+
+function playerReset() {
+    const pieces = 'ILJOTSZ';
+    player.matrix = createPiece(pieces[pieces.length * Math.random() | 0])
+    player.pos.y = 0;
+    player.pos.x = (arena[0].length / 2 | 0) -
+                    (player.matrix[0].length /2 | 0);
+    if (collide(arena,player)) {
+        arena.forEach(row => row.fill(0));
+    }
 }
 
 function playerRotate(dir) {    //>> function has been modified for edge detection so that upon rotation if the tetrimino collides with a side it will correct itself
@@ -136,12 +201,23 @@ function update(time = 0) {  //>> this was made to draw the game continously
     requestAnimationFrame(update);
 }
 
+const colors = [
+    null,
+    'red', 
+    'brown',
+    'violet', 
+    'green',
+    'orange',
+    'cyan',
+    'yellow',
+]
+
 const arena = createMatrix(12, 20); //>> this is made for capturing uncleared/stuck pieces
 
 
 const player = {
     pos: { x: 5, y: 5 },
-    matrix: matrix
+    matrix: createPiece('T'),
 }
 
 document.addEventListener('keydown', event=>{

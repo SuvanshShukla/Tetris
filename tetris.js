@@ -75,12 +75,36 @@ function playerDrop() {
     dropCounter = 0;    //>> here the drop counter is reset after every drop inorder to keep the drops uniform
 }
 
-function playerMove(dir){
-    player.pos.x += dir;
-    if(collide(arena, player)){
-        player.pos.x -= dir;
+function playerMove(dir){   //->tetrimino movement has been consolidated into a function
+    player.pos.x += dir;    //-> the value of direction matters, 1 means towards right or down and -1 means left
+    if(collide(arena, player)){ //## if the tetriminos collide with the arena they should be able to move back
+        player.pos.x -= dir;    //-> this is to allow the move back of the tetrimino
     }
     
+}
+
+function playerRotate(dir) {
+    rotate(player.matrix, dir);
+}
+
+function rotate(matrix, dir) {  //!! to rotate a tetrimino we transpose its matrix and then reverse its columns
+    for(let y=0; y<matrix.length; ++y){
+        for(let x=0; x<y; ++x){     //-> the genius of this line is that we can simply swap elements of a matrix like this without using a temp vairable
+            [
+                matrix[x][y],
+                matrix[y][x]
+            ] = [
+                matrix[y][x],
+                matrix[x][y]
+            ];
+        }
+        if(dir>0){
+            matrix.forEach(row => row.reverse());
+        }
+        else{
+            matrix.reverse();
+        }
+    }
 }
 
 let dropCounter = 0;    //->we set a drop counter to count how much time later the next drop in ordinate should occur
@@ -119,8 +143,15 @@ document.addEventListener('keydown', event=>{
     else if(event.keyCode === 40){
         playerDrop();
     }
+    else if(event.keyCode === 81){
+        playerRotate(-1);
+    }
+    else if(event.keyCode === 69){
+        playerRotate(1);
+    }
     
     
 })
 
-update(); //>> game is initialized here
+update(); //>> the game is initialized here
+//>> the logic behind rotation of tetriminos is a transpose of the matrix and then reverse each row i.e. row1 row2 row3 after the reverse will become row3 row2 row1

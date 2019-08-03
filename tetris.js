@@ -37,6 +37,7 @@ function draw() {   //OKK made a separate function to draw tetriminos
     context.fillStyle = '#000'; //-> this and the line below it are written to refresh the canvas 
     context.fillRect(0, 0, canvas.width, canvas.height);
 
+    drawMatrix(arena, {x: 0, y: 0});
     drawMatrix(player.matrix, player.pos);
 }
 

@@ -4,22 +4,32 @@ const context = canvas.getContext('2d');
 context.scale(20, 20);
 
 function arenaSweep() {
-    for(let y = arena.length-1; y<0; --y){
+    let rowCount = 1;
+    outer: for(let y = arena.length-1; y>0; --y){
         for (let x=0; x<arena[y].length; ++x){
-            
+            if(arena[y][x]===0) {
+                continue outer;
+            }
         }
+        const row = arena.splice(y, 1)[0].fill(0);
+        arena.unshift(row); 
+        ++y;
+
+        player.score += rowCount*10;
+        rowCount *= 2
     }
 }
 
 
 
 function collide(arena, player) {   //>>for collision detection
-    const [m, o] = [player.matrix, player.pos];
+    const m = player.matrix;
+    const o = player.pos;
     for(let y=0; y<m.length; ++y){  //## we are basically iterating over the player here
         for(let x=0; x<m[y].length; ++x){
             if(m[y][x] !==0 &&      //-> check player matrix on y and x if not zero we continue
                 (arena[y + o.y] &&  //-> here we check if the arena has a row 
-                 arena[y +o.y][x + o.x]) !==0){  //-> here we check if the arena has both and they are both not zero then return true
+                 arena[y + o.y][x + o.x]) !==0){  //-> here we check if the arena has both and they are both not zero then return true
                     return true;
             }
         }
@@ -101,8 +111,8 @@ function drawMatrix(matrix, offset) {
             if (value !== 0) {     //>>only if the space is not zero
                 context.fillStyle = colors[value];       //## fills the block with color red
                 context.fillRect(x + offset.x,
-                    y + offset.y,
-                    1, 1);   //## fills with one unit at the corresponding abcissa and ordinate
+                                 y + offset.y,
+                                 1, 1);   //## fills with one unit at the corresponding abcissa and ordinate
 
             }
         });
@@ -125,14 +135,17 @@ function playerDrop() {
         player.pos.y--;
         merge(arena, player);
         playerReset();
+        // debugger;
+        arenaSweep();
+        updateScore();
     }
     dropCounter = 0;    //>> here the drop counter is reset after every drop inorder to keep the drops uniform
 }
 
-function playerMove(dir){   //->tetrimino movement has been consolidated into a function
-    player.pos.x += dir;    //-> the value of direction matters, 1 means towards right or down and -1 means left
+function playerMove(offset){   //->tetrimino movement has been consolidated into a function
+    player.pos.x += offset;    //-> the value of direction matters, 1 means towards right or down and -1 means left
     if(collide(arena, player)){ //## if the tetriminos collide with the arena they should be able to move back
-        player.pos.x -= dir;    //-> this is to allow the move back of the tetrimino
+        player.pos.x -= offset;    //-> this is to allow the move back of the tetrimino
     }
     
 }
@@ -145,6 +158,8 @@ function playerReset() {
                     (player.matrix[0].length /2 | 0);
     if (collide(arena,player)) {
         arena.forEach(row => row.fill(0));
+        player.score = 0;
+        updateScore();
     }
 }
 
@@ -201,6 +216,10 @@ function update(time = 0) {  //>> this was made to draw the game continously
     requestAnimationFrame(update);
 }
 
+function updateScore() {
+    document.getElementById('score').innerText = player.score; 
+}
+
 const colors = [
     null,
     'red', 
@@ -216,8 +235,9 @@ const arena = createMatrix(12, 20); //>> this is made for capturing uncleared/st
 
 
 const player = {
-    pos: { x: 5, y: 5 },
-    matrix: createPiece('T'),
+    pos: { x: 0, y: 0 },
+    matrix: null,
+    score: 0,
 }
 
 document.addEventListener('keydown', event=>{
@@ -234,12 +254,14 @@ document.addEventListener('keydown', event=>{
     else if(event.keyCode === 81){
         playerRotate(-1);
     }
-    else if(event.keyCode === 69){
+    else if(event.keyCode === 87){
         playerRotate(1);
     }
     
     
 })
 
+playerReset();
+updateScore();
 update(); //>> the game is initialized here
 //>> the logic behind rotation of tetriminos is a transpose of the matrix and then reverse each row i.e. row1 row2 row3 after the reverse will become row3 row2 row1

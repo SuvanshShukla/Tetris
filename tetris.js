@@ -3,6 +3,9 @@ const context = canvas.getContext('2d');
 
 context.scale(20, 20);
 
+//>>There is actually an issue of caching in browsers while running this which causes some pieces to rotate funny
+//>> So to avoid that you should probably clear your browsers cache before playing/running
+
 function arenaSweep() {
     let rowCount = 1;
     outer: for(let y = arena.length-1; y>0; --y){
